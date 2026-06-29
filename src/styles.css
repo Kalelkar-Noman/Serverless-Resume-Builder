@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-base: #f8fafc;
+    --brand-card: #ffffff;
+    --brand-card-hover: #f1f5f9;
+    --brand-accent: #3b82f6;
+    --brand-main: #0f172a;
+    --brand-muted: #64748b;
+    --brand-border: rgba(0, 0, 0, 0.1);
+  }
+
+  .dark {
+    --brand-base: #0b1120;
+    --brand-card: #111827;
+    --brand-card-hover: #1f2937;
+    --brand-accent: #3b82f6;
+    --brand-main: #f9fafb;
+    --brand-muted: #cbd5e1;
+    --brand-border: rgba(255, 255, 255, 0.12);
+  }
+}

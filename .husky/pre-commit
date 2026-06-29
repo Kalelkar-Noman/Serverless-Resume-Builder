@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+echo "=== Running Local CI Pipeline ==="
+
+# Format check
+npx prettier --check "src/**/*.ts" || exit 1
+
+# ESLint
+npx eslint "src/**/*.ts" || exit 1
+
+# Unit tests
+npx ng test --watch=false || exit 1
