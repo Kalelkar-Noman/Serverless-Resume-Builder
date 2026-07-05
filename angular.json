@@ -19,6 +19,9 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "prerender": {
+              "routesFile": "routes.txt"
+            },
             "assets": [
               {
                 "glob": "**/*",
@@ -26,7 +29,15 @@
               },
               "contributors.json"
             ],
-            "styles": ["node_modules/quill/dist/quill.snow.css", "src/styles.css"]
+            "styles": ["node_modules/quill/dist/quill.snow.css", "src/styles.css"],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "security": {
+              "allowedHosts": []
+            },
+            "ssr": {
+              "entry": "src/server.ts"
+            }
           },
           "configurations": {
             "production": {
@@ -53,9 +64,6 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "options": {
-            "allowedHosts": ["6641-203-192-239-169.ngrok-free.app"]
-          },
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
