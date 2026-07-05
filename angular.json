@@ -22,6 +22,7 @@
             "prerender": {
               "routesFile": "routes.txt"
             },
+            "externalDependencies": ["@netlify/angular-runtime/context.mjs"],
             "assets": [
               {
                 "glob": "**/*",
@@ -31,7 +32,6 @@
             ],
             "styles": ["node_modules/quill/dist/quill.snow.css", "src/styles.css"],
             "server": "src/main.server.ts",
-            "outputMode": "server",
             "security": {
               "allowedHosts": []
             },
