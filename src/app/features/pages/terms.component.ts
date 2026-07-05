@@ -26,8 +26,8 @@ import { RouterLink } from '@angular/router';
 
             <h2 class="text-xl font-semibold text-brand-main mt-8 mb-4">1. Introduction</h2>
             <p>
-              Welcome to Kalelkar Noman Free Resume Builder. By accessing our website and using our
-              service, you agree to comply with and be bound by the following terms.
+              Welcome to KN Free Resume Builder. By accessing our website and using our service, you
+              agree to comply with and be bound by the following terms.
             </p>
 
             <h2 class="text-xl font-semibold text-brand-main mt-8 mb-4">2. Open Source License</h2>
