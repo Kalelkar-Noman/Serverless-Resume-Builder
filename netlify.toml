@@ -1,3 +1,9 @@
 [build]
   command = "npm run build"
   publish = "dist/serverless-resume-builder/browser"
+
+[[plugins]]
+  package = "@netlify/angular-runtime"
+  
+  [plugins.inputs]
+    disabled = true
