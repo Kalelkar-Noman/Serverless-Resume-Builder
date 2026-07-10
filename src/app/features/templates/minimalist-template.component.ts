@@ -136,22 +136,15 @@ import { ResumeData } from '../../core/models/resume.model';
   styles: [
     `
       .resume-template {
-        width: var(--doc-width, 210mm);
-        min-height: var(--doc-height, 297mm);
+        width: 100%;
+        min-height: 100%;
         background-color: var(--theme-bg);
         color: var(--theme-text);
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
       }
-      @media print {
-        .resume-template {
-          width: 100% !important;
-          min-height: auto !important;
-          box-shadow: none !important;
-          margin: 0 !important;
-        }
-      }
+
       ::ng-deep .quill-content {
         white-space: pre-wrap;
         word-wrap: break-word;

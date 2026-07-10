@@ -23,3 +23,88 @@
     --brand-border: rgba(255, 255, 255, 0.12);
   }
 }
+
+/* ============================================================
+   PRINT STYLES — Single source of truth for all templates
+   ============================================================ */
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  /* Force all colors to print exactly as shown on screen */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Strip the entire app shell so only the resume prints */
+  html,
+  body,
+  app-root {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Collapse all layout wrappers */
+  body > app-root > div,
+  app-builder,
+  app-live-preview,
+  .flex-1,
+  main,
+  .h-full,
+  .h-screen {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Hide all non-document elements */
+  header,
+  footer,
+  aside,
+  .print\:hidden,
+  .page-break-indicator {
+    display: none !important;
+  }
+
+  /* Reset the resume document for print */
+  #resume-document {
+    transform: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .resume-template {
+    transform: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: auto !important;
+  }
+
+  /* Reset scroll containers */
+  .custom-scrollbar,
+  .overflow-y-auto,
+  .overflow-hidden,
+  .overflow-x-hidden {
+    height: auto !important;
+    overflow: visible !important;
+  }
+}

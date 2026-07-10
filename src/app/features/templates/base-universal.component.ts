@@ -14,8 +14,6 @@ import { ResumeData, ResumeSection } from '../../core/models/resume.model';
         [style.--theme-bg]="data.design?.background || '#FFFFFF'"
         [style.--theme-highlight]="data.design?.highlight || '#4F46E5'"
         [style.--theme-surface]="data.design?.surface || '#EEF2FF'"
-        [style.width]="'var(--doc-width, 210mm)'"
-        [style.min-height]="'var(--doc-height, 297mm)'"
         [style.padding]="'var(--doc-padding, 1.5rem)'"
         [class]="
           'mx-auto shadow-lg print:shadow-none print:max-w-none print:w-full print:p-0 resume-template ' +
@@ -120,7 +118,8 @@ import { ResumeData, ResumeSection } from '../../core/models/resume.model';
   styles: [
     `
       .resume-template {
-        page-break-after: always;
+        width: 100%;
+        min-height: 100%;
         background-color: var(--theme-bg);
         color: var(--theme-text);
         -webkit-print-color-adjust: exact !important;

@@ -1,4 +1,12 @@
-import { Component, OnInit, inject, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  ElementRef,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ResumeStateService } from '../../core/services/resume-state.service';
 import { Observable } from 'rxjs';
@@ -8,6 +16,17 @@ import { ModernTemplateComponent } from '../templates/modern-template.component'
 import { TerminalTemplateComponent } from '../templates/terminal-template.component';
 import { MinimalistTemplateComponent } from '../templates/minimalist-template.component';
 import { PdfExportService } from '../../core/services/pdf-export.service';
+
+/**
+ * Canonical pixel widths for document sizes at 96 DPI.
+ * These are the ONLY source of truth for document dimensions.
+ * - A4:     210mm × 297mm → 794px × 1123px
+ * - Letter: 8.5in × 11in → 816px × 1056px
+ */
+const DOC_SIZES = {
+  a4: { width: 794, height: 1123 },
+  letter: { width: 816, height: 1056 },
+} as const;
 
 @Component({
   selector: 'app-live-preview',
@@ -21,22 +40,20 @@ import { PdfExportService } from '../../core/services/pdf-export.service';
   ],
   template: `
     <div class="h-full relative bg-gray-50/50">
+      <!-- Scrollable preview area -->
       <div
+        #previewContainer
         class="h-full overflow-y-auto overflow-x-hidden py-4 custom-scrollbar flex flex-col items-center"
       >
         @if (resumeData$ | async; as data) {
           <div
             id="resume-document"
-            class="transition-transform duration-300 flex-shrink-0"
-            [style.transform]="scale !== 1 ? 'scale(' + scale + ')' : 'none'"
+            class="flex-shrink-0 bg-white shadow-xl"
+            [style.width.px]="getDocWidth(data.design?.documentSize)"
+            [style.min-height.px]="getDocHeight(data.design?.documentSize)"
+            [style.transform]="'scale(' + scale + ')'"
             [style.transform-origin]="'top center'"
-            [style.margin-bottom.px]="
-              scale !== 1 ? (data.design?.documentSize === 'letter' ? 1056 : 1122) * (scale - 1) : 0
-            "
-            [style.width]="data.design?.documentSize === 'letter' ? '215.9mm' : '210mm'"
-            [style.min-height]="data.design?.documentSize === 'letter' ? '279.4mm' : '297mm'"
-            [style.--doc-width]="data.design?.documentSize === 'letter' ? '215.9mm' : '210mm'"
-            [style.--doc-height]="data.design?.documentSize === 'letter' ? '279.4mm' : '297mm'"
+            [style.margin-bottom.px]="getMarginBottom(data.design?.documentSize)"
             [style.--doc-padding]="getPaddingForMargins(data.design?.margins)"
           >
             @switch (data.templateId) {
@@ -57,23 +74,49 @@ import { PdfExportService } from '../../core/services/pdf-export.service';
         }
       </div>
 
+      <!-- Download button -->
       <button
         (click)="downloadPdf()"
-        class="absolute bottom-4 right-4 bg-brand-accent hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent"
+        [disabled]="isGenerating"
+        class="absolute bottom-4 right-4 bg-brand-accent hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-accent disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5 mr-2"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        Download PDF
+        @if (isGenerating) {
+          <svg
+            class="animate-spin h-5 w-5 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ></path>
+          </svg>
+          Generating...
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Download PDF
+        }
       </button>
     </div>
   `,
@@ -99,46 +142,108 @@ import { PdfExportService } from '../../core/services/pdf-export.service';
     `,
   ],
 })
-export class LivePreviewComponent implements OnInit {
+export class LivePreviewComponent implements OnInit, AfterViewInit, OnDestroy {
   private resumeStateService = inject(ResumeStateService);
   private pdfExportService = inject(PdfExportService);
+  private elRef = inject(ElementRef);
+  private cdr = inject(ChangeDetectorRef);
 
   resumeData$!: Observable<ResumeData>;
   scale = 1;
+  isGenerating = false;
 
-  @HostListener('window:resize')
-  onResize() {
-    if (typeof window !== 'undefined') {
-      if (window.innerWidth <= 1024) {
-        // Standard A4 width in pixels is ~794px. We subtract 32px for padding.
-        this.scale = (window.innerWidth - 32) / 794;
-      } else {
-        this.scale = 1;
-      }
-    }
-  }
+  private resizeObserver: ResizeObserver | null = null;
+  private containerEl: HTMLElement | null = null;
 
   ngOnInit(): void {
     this.resumeData$ = this.resumeStateService.resumeData$;
-    this.onResize();
   }
 
-  downloadPdf(): void {
+  ngAfterViewInit(): void {
+    // Get the actual scrollable container element
+    this.containerEl = this.elRef.nativeElement.querySelector('.custom-scrollbar');
+    if (!this.containerEl || typeof ResizeObserver === 'undefined') {
+      // Fallback for SSR or environments without ResizeObserver
+      this.updateScale();
+      return;
+    }
+
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateScale();
+    });
+    this.resizeObserver.observe(this.containerEl);
+
+    // Initial scale calculation
+    this.updateScale();
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+  }
+
+  /**
+   * Calculate the correct scale factor based on the container's actual width.
+   * The document is always rendered at its canonical pixel width (794px for A4).
+   * We scale it down to fit the container, but never scale up beyond 1.0.
+   */
+  private updateScale(): void {
+    if (!this.containerEl) return;
+
+    const containerWidth = this.containerEl.clientWidth;
+    const padding = 32; // 16px padding on each side
+    const availableWidth = containerWidth - padding;
+
+    // Get the current document size from state
     const data = this.resumeStateService.getCurrentResumeData();
-    this.pdfExportService
-      .downloadPdf(data.design)
-      .catch((error) => console.error('PDF download failed:', error));
+    const docWidth = this.getDocWidth(data.design?.documentSize);
+
+    // Scale down to fit, but never scale up
+    const newScale = Math.min(1, availableWidth / docWidth);
+    if (Math.abs(newScale - this.scale) > 0.001) {
+      this.scale = newScale;
+      this.cdr.detectChanges();
+    }
+  }
+
+  /** Get the canonical pixel width for the selected document size */
+  getDocWidth(size?: string): number {
+    return size === 'letter' ? DOC_SIZES.letter.width : DOC_SIZES.a4.width;
+  }
+
+  /** Get the canonical pixel height for the selected document size */
+  getDocHeight(size?: string): number {
+    return size === 'letter' ? DOC_SIZES.letter.height : DOC_SIZES.a4.height;
+  }
+
+  /**
+   * When the document is scaled down, it visually shrinks but still occupies
+   * its full pixel height in the layout flow. We add negative margin-bottom
+   * to compensate, so the scrollbar reflects the visual size.
+   */
+  getMarginBottom(size?: string): number {
+    if (this.scale >= 1) return 0;
+    const docHeight = this.getDocHeight(size);
+    return docHeight * (this.scale - 1);
   }
 
   getPaddingForMargins(margins: string | undefined): string {
-    // If it's a full-bleed template (like modern), the outer padding might be handled differently,
-    // but we can set the default CSS variable for them to use internally if they wish.
-
-    // Optional: we could use templateId here to force 0 padding for specific templates
-    // if (templateId === 'modern') return '0';
-
     if (margins === 'none') return '0';
     if (margins === 'narrow') return '1.5rem';
     return '3rem'; // standard
+  }
+
+  async downloadPdf(): Promise<void> {
+    if (this.isGenerating) return;
+    this.isGenerating = true;
+    this.cdr.detectChanges();
+    try {
+      const data = this.resumeStateService.getCurrentResumeData();
+      await this.pdfExportService.downloadPdf(data.design);
+    } catch (error) {
+      console.error('PDF download failed:', error);
+    } finally {
+      this.isGenerating = false;
+      this.cdr.detectChanges();
+    }
   }
 }
