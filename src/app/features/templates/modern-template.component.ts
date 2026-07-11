@@ -148,8 +148,8 @@ import { ResumeData } from '../../core/models/resume.model';
   styles: [
     `
       .resume-template {
-        width: var(--doc-width, 210mm);
-        min-height: var(--doc-height, 297mm);
+        width: 100%;
+        min-height: 100%;
         background: var(--theme-bg);
         color: var(--theme-text);
         -webkit-print-color-adjust: exact !important;
@@ -190,14 +190,7 @@ import { ResumeData } from '../../core/models/resume.model';
         color: var(--theme-highlight);
         background-color: var(--theme-surface);
       }
-      @media print {
-        .resume-template {
-          width: 100% !important;
-          min-height: 100vh !important;
-          box-shadow: none !important;
-          margin: 0 !important;
-        }
-      }
+
       ::ng-deep .quill-content {
         white-space: pre-wrap;
         word-wrap: break-word;

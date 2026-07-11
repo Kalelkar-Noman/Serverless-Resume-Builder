@@ -18,7 +18,10 @@ import { ResumeData } from '../../core/models/resume.model';
       [style.--theme-bg]="data.design?.background || '#000000'"
       [style.--theme-highlight]="data.design?.highlight || '#22c55e'"
       [style.padding]="'var(--doc-padding, 2.5rem)'"
-      class="resume-template full-bleed-template term-main font-fira shadow-2xl mx-auto print:p-6 overflow-hidden"
+      [class]="
+        'resume-template full-bleed-template term-main shadow-2xl mx-auto print:p-6 overflow-hidden ' +
+        (data.design?.font || 'font-fira')
+      "
     >
       <div class="mb-10 print:mb-6 border-b term-border border-dashed pb-8 print:pb-4">
         <h1 class="text-4xl font-bold mb-3 tracking-tight">> {{ data.personalInfo.name }}_</h1>
@@ -111,8 +114,8 @@ import { ResumeData } from '../../core/models/resume.model';
   styles: [
     `
       .resume-template {
-        width: var(--doc-width, 210mm);
-        min-height: var(--doc-height, 297mm);
+        width: 100%;
+        min-height: 100%;
         background-color: var(--theme-bg);
         color: var(--theme-text);
         /* Force dark background printing */
@@ -144,14 +147,6 @@ import { ResumeData } from '../../core/models/resume.model';
         background-color: var(--theme-surface);
       }
 
-      @media print {
-        .resume-template {
-          width: 100% !important;
-          min-height: auto !important;
-          box-shadow: none !important;
-          margin: 0 !important;
-        }
-      }
       ::ng-deep .quill-content {
         white-space: pre-wrap;
         word-wrap: break-word;
