@@ -8,6 +8,7 @@ export const metadata = {
     'Create a professional ATS-friendly resume online for free. Build, customize, and download PDF resumes directly in your browser with no signup required. Privacy-first resume builder by Kalelkar Noman.',
   authors: [{ name: 'Kalelkar Noman' }],
   robots: 'index, follow',
+  metadataBase: new URL('https://resume-builder-noman-kalelkar.netlify.app/'),
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
