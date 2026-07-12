@@ -49,25 +49,43 @@ export const ResumePDFPreview = memo(
     const height = isA4 ? A4_HEIGHT_PX : LETTER_HEIGHT_PX;
 
     return (
-      <div
-        style={{
-          width: `${width * scale}px`,
-          height: `${height * scale}px`,
-        }}
-        className="relative bg-white shadow-lg"
-      >
-        {pdfUrl ? (
-          <iframe
-            src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-            width="100%"
-            height="100%"
-            className="border-none"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
-            Loading Preview...
-          </div>
-        )}
+      <div className="flex h-full w-full justify-center md:block md:h-auto md:w-auto">
+        <div
+          style={{
+            width: `${width * scale}px`,
+            height: `${height * scale}px`,
+          }}
+          className="relative hidden bg-white shadow-lg md:block"
+        >
+          {pdfUrl ? (
+            <iframe
+              src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+              width="100%"
+              height="100%"
+              className="border-none"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
+              Loading Preview...
+            </div>
+          )}
+        </div>
+
+        {/* Mobile View PDF Button */}
+        <div className="flex w-full flex-col items-center justify-center px-4 py-16 md:hidden">
+          <p className="mb-4 text-center text-sm text-gray-500">
+            Live preview is optimized for desktop. On mobile, please open the PDF directly.
+          </p>
+          <a
+            href={pdfUrl || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary w-full max-w-xs text-center"
+            style={{ opacity: pdfUrl ? 1 : 0.5, pointerEvents: pdfUrl ? 'auto' : 'none' }}
+          >
+            {pdfUrl ? 'View Resume PDF' : 'Generating PDF...'}
+          </a>
+        </div>
       </div>
     );
   }
