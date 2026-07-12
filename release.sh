@@ -193,7 +193,7 @@ if ! git rev-parse --is-inside-work-tree &>/dev/null; then
 fi
 
 # Commit
-COMMIT_MSG="Release v${NEW_VERSION}"
+COMMIT_MSG="chore(release): v${NEW_VERSION}"
 echo -e "${GREEN}→${NC} Git commit: ${CYAN}${COMMIT_MSG}${NC}"
 if ! $DRY_RUN; then
     git add -A
