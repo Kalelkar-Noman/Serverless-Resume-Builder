@@ -1,21 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./src/**/*.{html,ts}'],
-  darkMode: 'class',
+  content: ['./src/app/**/*.{ts,tsx,mdx}'],
   theme: {
     extend: {
       colors: {
-        brand: {
-          base: 'var(--brand-base)',
-          card: 'var(--brand-card)',
-          'card-hover': 'var(--brand-card-hover)',
-          accent: 'var(--brand-accent)',
-          main: 'var(--brand-main)',
-          muted: 'var(--brand-muted)',
-          border: 'var(--brand-border)',
+        primary: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          900: '#0c4a6e',
+          DEFAULT: '#0ea5e9',
         },
+      },
+      backgroundImage: {
+        dot: "url('/assets/dots.svg')",
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar')({ nocompatible: true }),
+    require('@tailwindcss/aspect-ratio'),
+  ],
 };
