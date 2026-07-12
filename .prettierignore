@@ -4,3 +4,4 @@ coverage
 .angular
 .vscode
 package-lock.json
+.next
